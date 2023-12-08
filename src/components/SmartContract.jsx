@@ -16,14 +16,6 @@ const SmartContract = () => {
 
   const contractAdd = "0x165cf2882c659fba81341F12B04658A20C77dA3C";
   const contract = new web3.eth.Contract(contractAbi(), contractAdd);
-  /*
-  if (contractAdd) {
-    const contract = new web3.eth.Contract(contractAbi(), contractAdd);
-    // Rest of your code using the contract instance...
-  } else {
-    console.error("Contract address is not defined or invalid.");
-    // Handle the situation when the contract address is missing or incorrect
-  }*/
 
   const [error, setError] = useState(null);
   const [participants, setParticipants] = useState([]);
