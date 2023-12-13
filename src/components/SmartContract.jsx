@@ -14,7 +14,7 @@ const SmartContract = () => {
   const web3 = new Web3(Web3.givenProvider);
   console.log("Given Provider:", web3.currentProvider); // Log the current provider object
 
-  const contractAdd = "0x165cf2882c659fba81341F12B04658A20C77dA3C";
+  const contractAdd = "0xa259a7B95f7FF9515095a5DB39C5E45C0a9947c5";
   const contract = new web3.eth.Contract(contractAbi(), contractAdd);
 
   const [error, setError] = useState(null);
