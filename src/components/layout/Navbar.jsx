@@ -17,7 +17,7 @@ const Navbar = () => {
       <header id="navbar" className="mb-auto">
         <div>
           <Link className="navbar-brand float-md-start mb-0" to="/">
-            <h3>Loteria</h3>
+            <h3>Sorteo</h3>
           </Link>
 
           {!context.authenticated ? (
