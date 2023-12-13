@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Web3 from 'web3';
 
 // Context
@@ -20,36 +19,49 @@ const SmartContract = () => {
   const [error, setError] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [contractBalance, setContractBalance] = useState(0);
+  const [isContractOwner, setIsContractOwner] = useState(false);
 
   // Default error message
   const msg = "Transaction failed. Check your wallet transactions for more details.";
 
   // PARTICIPATE FUNCTION
   async function participate() {
-    // Reset error message
-    setError(null);
+    // Check if the current user is not the contract owner
+    if (!isContractOwner) {
+      // Reset error message
+      setError(null);
 
-    try {
-      await contract.methods.participate().send({ from: context.userAcc, value: web3.utils.toWei('0.005', 'ether') });
-      await fetchParticipants();
-    } catch (error) {
-      setError(msg);
-      console.error(error);
+      try {
+        await contract.methods.participate().send({ from: context.userAcc, value: web3.utils.toWei('0.005', 'ether') });
+        await fetchParticipants();
+      } catch (error) {
+        setError(msg);
+        console.error(error);
+      }
+    } else {
+      // Contract owner cannot participate
+      setError("Contract owner cannot participate.");
     }
   }
 
   // SELECT WINNER FUNCTION
   async function selectWinner() {
-    // Reset error message
-    setError(null);
+    // Check if the current user is the contract owner
+    if (isContractOwner) {
+      // Reset error message
+      setError(null);
 
-    try {
-      await contract.methods.selectWinner().send({ from: context.userAcc });
-      await fetchParticipants();
-      await fetchContractBalance();
-    } catch (error) {
-      setError(msg);
-      console.error(error);
+      try {
+        await contract.methods.selectWinner().send({ from: context.userAcc });
+        await fetchParticipants();
+        await fetchContractBalance();
+      } catch (error) {
+        setError(msg);
+        console.error(error);
+      }
+    } else {
+      // Non-contract owner cannot select winner
+      setError("Only contract owner can select the winner.");
     }
   }
 
@@ -72,11 +84,22 @@ const SmartContract = () => {
     }
   }
 
-  // Fetch participants and contract balance on page load
+  // Fetch participants, contract balance, and contract owner on page load
   useEffect(() => {
     fetchParticipants();
     fetchContractBalance();
+    fetchContractOwner(); // Fetch contract owner address
   }, []);
+
+  // Fetch contract owner address
+  async function fetchContractOwner() {
+    try {
+      const owner = await contract.methods.admin().call();
+      setIsContractOwner(context.userAcc.toLowerCase() === owner.toLowerCase());
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <>
@@ -86,12 +109,19 @@ const SmartContract = () => {
         </p>
 
         <div className="d-flex flex-column">
-          <button className="btn btn-outline-secondary mb-3" onClick={participate}>
-            Participate (Ticket Price: 0.005 ether)
-          </button>
-          <button className="btn btn-outline-secondary mb-3" onClick={selectWinner}>
-            Select Winner
-          </button>
+          {/* Conditionally render the Participate button for non-owners */}
+          {!isContractOwner && (
+            <button className="btn btn-outline-secondary mb-3" onClick={participate}>
+              Participate (Ticket Price: 0.005 ether)
+            </button>
+          )}
+
+          {/* Conditionally render the Select Winner button for the contract owner */}
+          {isContractOwner && (
+            <button className="btn btn-outline-secondary mb-3" onClick={selectWinner}>
+              Select Winner
+            </button>
+          )}
         </div>
 
         <div>
